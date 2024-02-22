@@ -1,28 +1,18 @@
-const BASE_MAP_DIMENSIONS = {
-  height: 256,
-  width: 224
-}
-const BASE_SPRITE_WIDTH = 16 
+const BASE_SPRITE_WIDTH = 16
+const BASE_SPRITE_HEIGHT = 15
 const BASE_STARTING_HEIGHT = 16
 const BASE_STEP_DISTANCE = 1
-const BASE_SCORE_POSITION = {x: 88, y: 8}
-const BASE_LIVES_POSITION = {x: 8, y: 24}
-const SCALE_FACTOR = parseInt((window.innerHeight-20)/BASE_MAP_DIMENSIONS.height)
-// const SCALE_FACTOR = 1
-
-const MAP_DIMENSIONS = {
-  height: BASE_MAP_DIMENSIONS.height * SCALE_FACTOR,
-  width: BASE_MAP_DIMENSIONS.width * SCALE_FACTOR
-}
-
-const PLAYER_INITIAL_POSITION = {
-  x: parseInt(BASE_SPRITE_WIDTH*SCALE_FACTOR/2),
-  y: MAP_DIMENSIONS.height-(BASE_STARTING_HEIGHT*SCALE_FACTOR)
-}
-console.log(SCALE_FACTOR)
+let SCALE_FACTOR = 1
 
 let score = 0
 let lives = 6
+
+class SpriteObj {
+  constructor(width, height) {
+    this.width = width
+    this.height = height
+  }
+}
 
 function preload() {
   numbers_white = []
@@ -35,67 +25,112 @@ function preload() {
     numbers_cyan.push(loadImage(`./assets/misc/number_cyan_${i}.png`))
   }
 
-  animation_walk = loadAnimation(
-    './assets/animations/player_walk_1.png',
-    './assets/animations/player_walk_2.png',
-    './assets/animations/player_walk_3.png'
-  )
-  // imgWalk = loadImage("data/walking1.png");
+  animation_walk = loadAni('./assets/animations/player_walk_1.png', 3)
+
   icon_life = loadImage('./assets/misc/icon_life.png')
   map = loadImage('./assets/maps/map_25m.png')
+  map_data = loadJSON('./assets/maps/map_25m_data.json')
 }
 
 function setup() {
-  createCanvas(MAP_DIMENSIONS.width, MAP_DIMENSIONS.height)
+  SCALE_FACTOR = parseInt((window.innerHeight-20)/map_data.MAP_DIMENSIONS.height)
 
-  player = createSprite(PLAYER_INITIAL_POSITION.x, PLAYER_INITIAL_POSITION.y)
+  createCanvas(
+    map_data.MAP_DIMENSIONS.width*SCALE_FACTOR,
+    map_data.MAP_DIMENSIONS.height*SCALE_FACTOR
+  )
+
+  //World related
+  world.gravity.y = 10;
+  noFill()
+  border = new Sprite(
+    map_data.MAP_DIMENSIONS.width*SCALE_FACTOR/2,
+    map_data.MAP_DIMENSIONS.height*SCALE_FACTOR/2,
+    map_data.MAP_DIMENSIONS.width*SCALE_FACTOR + 2,
+    map_data.MAP_DIMENSIONS.height*SCALE_FACTOR + 2,
+    's'
+  );
+  border.shape = 'chain';
+
+  platforms = new Group()
+
+  map_data.PLATFORMS.forEach(platform => {
+    noStroke()
+    let newPLatform = new platforms.Sprite(
+      platform.x*SCALE_FACTOR,
+      platform.y*SCALE_FACTOR,
+      platform.width*SCALE_FACTOR,
+      platform.height*SCALE_FACTOR,
+      'static'
+    )
+    // newPLatform.visible = false
+    newPLatform.debug = true
+  })
+
+  noStroke()
+  player = createSprite(
+    map_data.PLAYER_INITIAL_POSITION.x*SCALE_FACTOR,
+    map_data.PLAYER_INITIAL_POSITION.y*SCALE_FACTOR
+  )
   player.scale = SCALE_FACTOR
-  player.debug = false
-  player.addAnimation('walker', animation_walk)
-  player.animation.stop()
-  // player.addImage(imgWalk)
-  player.mirrorX(-1)
+  player.height = BASE_SPRITE_HEIGHT*SCALE_FACTOR
+  player.width = BASE_SPRITE_WIDTH*SCALE_FACTOR
+  player.debug = true
+  player.rotationLock = true
+  player.addAni('walker', animation_walk)
+  player.mirror.x = true
   console.log(player)
 }
 
 function draw() {
 
   if(keyIsDown(LEFT_ARROW)) {
-    player.position.x -= player.position.x > PLAYER_INITIAL_POSITION.x
-      ? BASE_STEP_DISTANCE*SCALE_FACTOR
-      : 0
-    player.animation.play()
+    player.position.x -= checkOutOfBounds('left')
+      ? 0
+      : BASE_STEP_DISTANCE*SCALE_FACTOR
+
+    player.ani.play()
   }
   else if(keyIsDown(RIGHT_ARROW)) {
-    player.position.x += player.position.x < MAP_DIMENSIONS.width-PLAYER_INITIAL_POSITION.x
-      ? BASE_STEP_DISTANCE*SCALE_FACTOR
-      : 0
-    player.animation.play()
+    player.position.x += checkOutOfBounds('right')
+      ? 0
+      : BASE_STEP_DISTANCE*SCALE_FACTOR
+    player.ani.play()
   }
-  else if (keyCode === UP_ARROW) {
+  else if (keyIsDown(UP_ARROW)) {
     score++
   }
   else {
-    player.animation.stop()
-    player.animation.rewind()
+    //play(0) used to rewind animation
+    player.ani.play(0)
+    player.ani.stop()
   }
   background(map)
-  drawSprites()
   drawScore()
   drawLives()
 }
 
 function keyPressed() {
-  if (keyCode === LEFT_ARROW) {
-    player.mirrorX(1)
+  console.log(player)
+  if (keyCode === LEFT_ARROW && !player.ani.playing) {
+    player.mirror.x = false
   }
-  else if (keyCode === RIGHT_ARROW) {
-    player.mirrorX(-1)
+  else if (keyCode === RIGHT_ARROW && !player.ani.playing) {
+    player.mirror.x = true
   }
   else if (keyCode === DOWN_ARROW) {
     lives--
   }
   
+}
+
+function checkOutOfBounds(side) {
+  switch(side) {
+    case 'left':
+      return player.position.x <= parseInt(BASE_SPRITE_WIDTH*SCALE_FACTOR/2)
+    case 'right':
+      return player.position.x > map_data.MAP_DIMENSIONS.width*SCALE_FACTOR-parseInt(BASE_SPRITE_WIDTH*SCALE_FACTOR/2)
+  }
 }
 
 function drawScore() {
@@ -104,8 +139,8 @@ function drawScore() {
   for (let i = 0; i<6; i++) {
     image(
       numbers_white[scoreDigits[i]],
-      BASE_SCORE_POSITION.x*SCALE_FACTOR+8*i*SCALE_FACTOR,
-      BASE_SCORE_POSITION.y*SCALE_FACTOR,
+      map_data.SCORE_POSITION.x*SCALE_FACTOR+8*i*SCALE_FACTOR,
+      map_data.SCORE_POSITION.y*SCALE_FACTOR,
       8*SCALE_FACTOR,
       8*SCALE_FACTOR
     )
@@ -119,8 +154,8 @@ function drawLives() {
     if (lives > i) {
       image(
         lives > i ? icon_life : black_square,
-        BASE_LIVES_POSITION.x*SCALE_FACTOR+8*i*SCALE_FACTOR,
-        BASE_LIVES_POSITION.y*SCALE_FACTOR,
+        map_data.LIVES_POSITION.x*SCALE_FACTOR+8*i*SCALE_FACTOR,
+        map_data.LIVES_POSITION.y*SCALE_FACTOR,
         8*SCALE_FACTOR,
         8*SCALE_FACTOR
       )
@@ -128,8 +163,8 @@ function drawLives() {
     else {
       fill(0)
       rect(
-        BASE_LIVES_POSITION.x*SCALE_FACTOR+8*i*SCALE_FACTOR,
-        BASE_LIVES_POSITION.y*SCALE_FACTOR,
+        map_data.LIVES_POSITION.x*SCALE_FACTOR+8*i*SCALE_FACTOR,
+        map_data.LIVES_POSITION.y*SCALE_FACTOR,
         8*SCALE_FACTOR,
         8*SCALE_FACTOR
       )
