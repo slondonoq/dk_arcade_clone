@@ -83,7 +83,8 @@ function setup() {
 }
 
 function draw() {
-
+  //console.log(platforms);
+  //checkPlayerOnGround();
   if(keyIsDown(LEFT_ARROW)) {
     player.position.x -= checkOutOfBounds('left')
       ? 0
@@ -97,8 +98,11 @@ function draw() {
       : BASE_STEP_DISTANCE*SCALE_FACTOR
     player.ani.play()
   }
-  else if (keyIsDown(UP_ARROW)) {
-    score++
+  else if (keyIsDown(32)) {
+    /* if(checkPlayerOnGround()){
+      player.velocity.y = -5;
+    } */
+    player.velocity.y = -5;
   }
   else {
     //play(0) used to rewind animation
@@ -131,6 +135,17 @@ function checkOutOfBounds(side) {
     case 'right':
       return player.position.x > map_data.MAP_DIMENSIONS.width*SCALE_FACTOR-parseInt(BASE_SPRITE_WIDTH*SCALE_FACTOR/2)
   }
+}
+function checkPlayerOnGround() {
+  for (let i = 0; i < platforms.length; i++) {
+
+      if (player.collide(platforms[i])) {
+        console.log(true);
+          return true;
+      }
+  }
+  console.log(false);
+  return false;
 }
 
 function drawScore() {
