@@ -30,6 +30,13 @@ function preload() {
   icon_life = loadImage('./assets/misc/icon_life.png')
   map = loadImage('./assets/maps/map_25m.png')
   map_data = loadJSON('./assets/maps/map_25m_data.json')
+
+  princess = loadAnimation('assets/animations/princess_1.png', 'assets/animations/princess_2.png');
+  princess.frameDelay = 15;
+  princess.scale = SCALE_FACTOR *2.5;
+  donkey = loadAnimation ('assets/animations/donkey_1.png','assets/animations/donkey_2.png','assets/animations/donkey_3.png','assets/animations/donkey_4.png','assets/animations/donkey_5.png');
+  donkey.frameDelay = 20;
+  donkey.scale = SCALE_FACTOR*2.8;
 }
 
 function setup() {
@@ -65,6 +72,8 @@ function setup() {
     )
     // newPLatform.visible = false
     newPLatform.debug = true
+
+    
   })
 
   noStroke()
@@ -80,11 +89,26 @@ function setup() {
   player.addAni('walker', animation_walk)
   player.mirror.x = true
   console.log(player)
+
+  help = createSprite(360, 115);
+  help.scale = SCALE_FACTOR;
+  help.addImage('assets/misc/help.png');
+  help.immovable = true;
+  help.collider = 'none';
+  
+  barrels = new Sprite();
+  barrels.img = 'assets/misc/barrels.png';
+  barrels.scale = SCALE_FACTOR;
+  barrels.position.x = map_data.BARRELS_POSITION.x;
+  barrels.position.y = map_data.BARRELS_POSITION.y;
+  barrels.collider = 'none';
+
 }
 
 function draw() {
   //console.log(platforms);
   //checkPlayerOnGround();
+  
   if(keyIsDown(LEFT_ARROW)) {
     player.position.x -= checkOutOfBounds('left')
       ? 0
@@ -109,9 +133,12 @@ function draw() {
     player.ani.play(0)
     player.ani.stop()
   }
-  background(map)
-  drawScore()
-  drawLives()
+  background(map);
+  drawScore();
+  drawLives();
+  animation(princess, map_data.PRINCESS_INITIAL_POSITION.x, map_data.PRINCESS_INITIAL_POSITION.y);
+  animation(donkey, map_data.DONKEY_INITIAL_POSITION.x, map_data.DONKEY_INITIAL_POSITION.y);
+ 
 }
 
 function keyPressed() {
