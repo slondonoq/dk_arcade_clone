@@ -25,7 +25,12 @@ function preload() {
     numbers_cyan.push(loadImage(`./assets/misc/number_cyan_${i}.png`))
   }
 
+  animation_jump = loadAni('assets/animations/player_jump_1.png', 'assets/animations/player_jump_2.png' )
+  animation_jump.frameDelay = 20;
   animation_walk = loadAni('./assets/animations/player_walk_1.png', 3)
+  animation_death = loadAni('./assets/animations/player_death_1.png', 2)
+  animation_death.frameDelay = 40;
+  animation_stand = loadAni('./assets/animations/player_walk_1.png')
 
   icon_life = loadImage('./assets/misc/icon_life.png')
   map = loadImage('./assets/maps/map_25m.png')
@@ -34,7 +39,7 @@ function preload() {
   princess = loadAnimation('assets/animations/princess_1.png', 'assets/animations/princess_2.png');
   princess.frameDelay = 15;
   princess.scale = SCALE_FACTOR *2.5;
-  donkey = loadAnimation ('assets/animations/donkey_1.png','assets/animations/donkey_2.png','assets/animations/donkey_3.png','assets/animations/donkey_4.png','assets/animations/donkey_5.png');
+  donkey = loadAnimation ('assets/animations/donkey_1.png',5);
   donkey.frameDelay = 20;
   donkey.scale = SCALE_FACTOR*2.8;
 }
@@ -86,7 +91,10 @@ function setup() {
   player.width = BASE_SPRITE_WIDTH*SCALE_FACTOR
   player.debug = true
   player.rotationLock = true
+  player.addAni('death', animation_death)
   player.addAni('walker', animation_walk)
+  player.addAni('jumping', animation_jump)
+  player.addAni('stand', animation_stand)
   player.mirror.x = true
   console.log(player)
 
@@ -114,31 +122,43 @@ function draw() {
       ? 0
       : BASE_STEP_DISTANCE*SCALE_FACTOR
 
-    player.ani.play()
+    player.changeAni('walker')
+    player.mirror.x = false;
+    player.vel.x = -1;
   }
   else if(keyIsDown(RIGHT_ARROW)) {
+
     player.position.x += checkOutOfBounds('right')
       ? 0
       : BASE_STEP_DISTANCE*SCALE_FACTOR
-    player.ani.play()
+    player.changeAni('walker')
+    player.mirror.x = true;
+    player.vel.x = 1;
   }
   else if (keyIsDown(32)) {
+
     /* if(checkPlayerOnGround()){
       player.velocity.y = -5;
     } */
-    player.velocity.y = -5;
+    player.changeAni('jumping')
+    player.velocity.y = -4;
   }
   else {
     //play(0) used to rewind animation
-    player.ani.play(0)
+    player.changeAni('stand')
+    //player.ani.play(0)
     player.ani.stop()
+  }
+
+  if(lives===0){
+    player.changeAni('death')
+    
   }
   background(map);
   drawScore();
   drawLives();
   animation(princess, map_data.PRINCESS_INITIAL_POSITION.x, map_data.PRINCESS_INITIAL_POSITION.y);
   animation(donkey, map_data.DONKEY_INITIAL_POSITION.x, map_data.DONKEY_INITIAL_POSITION.y);
- 
 }
 
 function keyPressed() {
