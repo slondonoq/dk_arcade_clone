@@ -6,7 +6,8 @@ let SCALE_FACTOR = 1
 
 let score = 0
 let lives = 6
-
+let listBarrels = [];
+let barrel;
 class SpriteObj {
   constructor(width, height) {
     this.width = width
@@ -42,10 +43,15 @@ function preload() {
   donkey = loadAnimation ('assets/animations/donkey_1.png',5);
   donkey.frameDelay = 20;
   donkey.scale = SCALE_FACTOR*2.8;
+
+  barrelAni = loadAnimation('assets/animations/rolling_1.png', 'assets/animations/rolling_2.png', 'assets/animations/rolling_3.png', 'assets/animations/rolling_4.png');
+  
+  barrelAni.scale = SCALE_FACTOR*2.8; 
+  
 }
 
 function setup() {
-  SCALE_FACTOR = parseInt((window.innerHeight-20)/map_data.MAP_DIMENSIONS.height)
+  SCALE_FACTOR = parseInt((window.innerHeight-20)/map_data.MAP_DIMENSIONS.height);
 
   createCanvas(
     map_data.MAP_DIMENSIONS.width*SCALE_FACTOR,
@@ -79,6 +85,7 @@ function setup() {
     newPLatform.debug = true
 
     
+    
   })
 
   noStroke()
@@ -111,8 +118,9 @@ function setup() {
   barrels.position.y = map_data.BARRELS_POSITION.y;
   barrels.collider = 'none';
 
+  createBarrel();
+  //barrel = new Barrel(2);
 }
-
 function draw() {
   //console.log(platforms);
   //checkPlayerOnGround();
@@ -159,6 +167,11 @@ function draw() {
   drawLives();
   animation(princess, map_data.PRINCESS_INITIAL_POSITION.x, map_data.PRINCESS_INITIAL_POSITION.y);
   animation(donkey, map_data.DONKEY_INITIAL_POSITION.x, map_data.DONKEY_INITIAL_POSITION.y);
+ 
+  for (let i = listBarrels.length - 1; i >= 0; i--) {
+    listBarrels[i].update();
+  }
+
 }
 
 function keyPressed() {
@@ -244,4 +257,41 @@ function getDigitsArray(number, arrayLength=0) {
   }
 
   return result
+}
+
+
+class Barrel {
+  constructor(speed) {
+    this.sprite = new createSprite(100,230,30,30);
+    
+    this.sprite.diameter = 30;
+    this.sprite.animation = barrelAni;
+    this.sprite.animation.frameDelay = 20-speed;
+    this.sprite.vel.x = 3;
+    this.sprite.rotationLock=false;
+    this.sprite.debug = true;
+    
+  }
+  checkOutOfBoundsBarrel() {
+    
+    if( this.sprite.position.x > (map_data.MAP_DIMENSIONS.width*SCALE_FACTOR -this.sprite.diameter/2) || this.sprite.position.x < this.sprite.diameter/2){
+      if(this.sprite.position.y > (map_data.MAP_DIMENSIONS.height*SCALE_FACTOR -this.sprite.diameter*2)){
+        this.sprite.remove();
+      }
+      else{
+        this.sprite.vel.x *= -1;
+        this.sprite.animation.reverse();
+      }
+      
+    }
+  }
+  update() {
+    
+    this.checkOutOfBoundsBarrel()
+  }
+}
+
+function createBarrel() {
+
+  listBarrels.push(new Barrel(2));
 }
