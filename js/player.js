@@ -13,89 +13,116 @@ preloadMario = () => {
     animation_death.frameDelay = 40;
     animation_stand = loadAni('./assets/animations/player_walk_1.png')
 }
-/**
- * Set up the player (mario) sprite
- */
-setUpMario = () => {
-    // Initial position of the player (mario)
-    marioSprite = createSprite(
-        map_data.PLAYER_INITIAL_POSITION.x * SCALE_FACTOR ,
-        map_data.PLAYER_INITIAL_POSITION.y * SCALE_FACTOR
-    )
-    // Initial dimensions of the player (mario)
-    marioSprite.scale = 2.5
-    marioSprite.height = BASE_SPRITE_HEIGHT * marioSprite.scale
-    marioSprite.width = BASE_SPRITE_WIDTH * marioSprite.scale
-    marioSprite.debug = true
-    marioSprite.rotationLock = true
 
-    // Adding all the animations to the player (mario)
-    marioSprite.addAni('death', animation_death)
-    marioSprite.addAni('walker', animation_walk)
-    marioSprite.addAni('jumping', animation_jump)
-    marioSprite.addAni('stand', animation_stand)
-    marioSprite.mirror.x = true
+class Player {
+    /**
+     * Set up the player (mario) sprite
+     */
+    constructor(x, y) {
+        this.lives = 3;
+        this.sprite = new createSprite(x, y);
+        // Initial dimensions of the player (mario)
+        this.sprite.scale = 2.5
+        this.sprite.height = BASE_SPRITE_HEIGHT * this.sprite.scale
+        this.sprite.width = BASE_SPRITE_WIDTH * this.sprite.scale
+        this.sprite.debug = true
+        this.sprite.rotationLock = true
 
-    return marioSprite
+        // Adding all the animations to the player (mario)
+        this.sprite.addAni('death', animation_death)
+        this.sprite.addAni('walker', animation_walk)
+        this.sprite.addAni('jumping', animation_jump)
+        this.sprite.addAni('stand', animation_stand)
+        this.sprite.mirror.x = true
+
+        this.isPlayerOnTheGround = true;
+    }
+
+    loseLife() {
+        this.lives -= 1
+    }
+
+    /**
+     * Update the player's position and animations
+     */
+    update() {
+
+        let mvmt = createVector(0, 0);
+
+        this.isPlayerOnTheGround = this.sprite.colliding(platforms) > 1;
+
+        // Move the player to the left
+        if (pressedKeys['A']) {
+            mvmt.x -= 1
+            this.sprite.changeAni('walker')
+            this.sprite.mirror.x = false;
+            this.sprite.vel.x = -0.5;
+        }
+        // Move the player to the right
+        if (pressedKeys['D']) {
+            mvmt.x += 1
+            this.sprite.changeAni('walker')
+            this.sprite.mirror.x = true;
+            this.sprite.vel.x = 0.5;
+        }
+        // Jump the player
+        if (pressedKeys[' '] && this.isPlayerOnTheGround) {
+            this.sprite.changeAni('jumping');
+            this.sprite.velocity.y = -4;
+        }
+
+        // If the player is not moving and is on the ground, change the animation to standing
+        if (!this.isMoving() && this.isPlayerOnTheGround) {
+            this.sprite.changeAni('stand')
+        }
+
+        // Prevent to make diagonal movements faster than horizontal ones
+        mvmt.setMag(2.5);
+
+        this.sprite.position.x += mvmt.x;
+        this.sprite.position.y += mvmt.y;
+
+
+        // Check if the player is out of bounds
+        this.checkOutOfBounds();
+
+        // Check if the player is dead
+        if (this.lives < 1) {
+            player.sprite.changeAni('death')
+        }
+    }
+
+    /**
+     * Prevent the player from grap the borders of the screen
+     * @returns {Boolean}
+     */
+    checkOutOfBounds = () => {
+
+        if (this.sprite.colliding(border) > 0) {
+            console.log('colliding')
+
+            if (this.sprite.mirror.x == true) {
+                this.sprite.vel.x -= 0.5;
+            } else {
+                this.sprite.vel.x += 0.5;
+            }
+
+        }
+
+    }
+
+    checkDeath = () => {
+        if (this.sprite.colliding(barrels) > 0) {
+            this.loseLife()
+        }
+    }
+
+    /**
+     * Check if the player is moving
+     * @returns {boolean} is the player moving
+     */
+    isMoving = () => {
+        return pressedKeys['A'] || pressedKeys['D'] || pressedKeys[' ']
+    }
 }
-/**
- * Update the player's position and animations
- * @param mario
- */
-updateMario = (mario) => {
-    let mvmt = createVector(0, 0);
 
-    isPlayerOnTheGround = mario.colliding(platforms) > 10;
-
-    if (pressedKeys['A']) {
-        mvmt.x -= 1
-        mario.changeAni('walker')
-        mario.mirror.x = false;
-        mario.vel.x = -0.5;
-    }
-
-    if (pressedKeys['D']) {
-        mvmt.x += 1
-        mario.changeAni('walker')
-        mario.mirror.x = true;
-        mario.vel.x = 0.5;
-    }
-
-    if (pressedKeys[' '] && isPlayerOnTheGround && !mario.collides(platforms)) {
-        mario.changeAni('jumping');
-        mario.velocity.y = -4;
-    }
-
-    if (!isMoving() && isPlayerOnTheGround){
-        mario.changeAni('stand')
-
-    }
-
-    mvmt.setMag(2.5);
-
-    mario.position.x += mvmt.x;
-    mario.position.y += mvmt.y;
-}
-
-/**
- * Check if the player is out of bounds in the specified side
- * @param player Reference to the sprite of the player
- * @param {String} side Which side to check for
- * @returns {Boolean}
- */
-checkOutOfBounds = (player, side) =>{
-    switch (side) {
-        case 'left':
-            return player.position.x <= parseInt(BASE_SPRITE_WIDTH * SCALE_FACTOR / 2)
-        case 'right':
-            return player.position.x > map_data.MAP_DIMENSIONS.width * SCALE_FACTOR - parseInt(BASE_SPRITE_WIDTH * SCALE_FACTOR / 2)
-    }
-}
-
-/**
- * Check if the player is moving
- * @returns {boolean} is the player moving
- */
-isMoving = () => {
-    return pressedKeys['A'] || pressedKeys['D'] || pressedKeys[' ']
-}

@@ -13,72 +13,73 @@ preloadBoard = () => {
     }
     icon_life = loadImage('./assets/misc/icon_life.png')
 }
-/**
- * Update the board elements
- */
-updateBoard = () => {
-    drawScore();
-    drawLives();
-}
-
-/**
- * Draw the score on the board
- */
-function drawScore() {
-    const scoreDigits = getDigitsArray(score, 6)
-    push()
-    for (let i = 0; i < 6; i++) {
-        image(
-            numbers_white[scoreDigits[i]],
-            map_data.SCORE_POSITION.x * SCALE_FACTOR + 8 * i * SCALE_FACTOR,
-            map_data.SCORE_POSITION.y * SCALE_FACTOR,
-            8 * SCALE_FACTOR,
-            8 * SCALE_FACTOR
-        )
+class Score {
+    constructor() {
     }
-    pop()
+
+    update() {
+        const scoreDigits = this.getDigitsArray(score, 6)
+        push()
+        for (let i = 0; i < 6; i++) {
+            image(
+                numbers_white[scoreDigits[i]],
+                map_data.SCORE_POSITION.x * SCALE_FACTOR + 8 * i * SCALE_FACTOR,
+                map_data.SCORE_POSITION.y * SCALE_FACTOR,
+                8 * SCALE_FACTOR,
+                8 * SCALE_FACTOR
+            )
+        }
+        pop()
+    }
+
+    /**
+     * Get the digits of a number in an array
+     * @param number
+     * @param arrayLength
+     * @returns {number[]}
+     */
+    getDigitsArray(number, arrayLength = 0) {
+        const result = Array.from(number.toString(), (digit => parseInt(digit)))
+
+        //fill missing places to the left with zeroes
+        if (arrayLength - result.length > 0) {
+            return Array(arrayLength - result.length).fill(0).concat(result)
+        }
+
+        return result
+    }
+
 }
 
 /**
  * Draw the lives on the board
  */
-function drawLives() {
-    push()
-    for (let i = 0; i < 6; i++) {
-        if (lives > i) {
-            image(
-                lives > i ? icon_life : black_square,
-                map_data.LIVES_POSITION.x * SCALE_FACTOR + 8 * i * SCALE_FACTOR,
-                map_data.LIVES_POSITION.y * SCALE_FACTOR,
-                8 * SCALE_FACTOR,
-                8 * SCALE_FACTOR
-            )
-        } else {
-            fill(0)
-            rect(
-                map_data.LIVES_POSITION.x * SCALE_FACTOR + 8 * i * SCALE_FACTOR,
-                map_data.LIVES_POSITION.y * SCALE_FACTOR,
-                8 * SCALE_FACTOR,
-                8 * SCALE_FACTOR
-            )
+class Lives {
+    constructor() {
+    }
+
+    update() {
+        push()
+        for (let i = 0; i < 6; i++) {
+            if (lives > i) {
+                image(
+                    lives > i ? icon_life : black_square,
+                    map_data.LIVES_POSITION.x * SCALE_FACTOR + 8 * i * SCALE_FACTOR,
+                    map_data.LIVES_POSITION.y * SCALE_FACTOR,
+                    8 * SCALE_FACTOR,
+                    8 * SCALE_FACTOR
+                )
+            } else {
+                fill(0)
+                rect(
+                    map_data.LIVES_POSITION.x * SCALE_FACTOR + 8 * i * SCALE_FACTOR,
+                    map_data.LIVES_POSITION.y * SCALE_FACTOR,
+                    8 * SCALE_FACTOR,
+                    8 * SCALE_FACTOR
+                )
+            }
         }
+        pop()
     }
-    pop()
 }
 
-/**
- * Get the digits of a number in an array
- * @param number
- * @param arrayLength
- * @returns {number[]}
- */
-function getDigitsArray(number, arrayLength = 0) {
-    const result = Array.from(number.toString(), (digit => parseInt(digit)))
-
-    //fill missing places to the left with zeroes
-    if (arrayLength - result.length > 0) {
-        return Array(arrayLength - result.length).fill(0).concat(result)
-    }
-
-    return result
-}
