@@ -37,7 +37,8 @@ function setup() {
     SCALE_FACTOR = parseInt((window.innerHeight - 20) / map_data.MAP_DIMENSIONS.height)
 
     player = new Player(map_data.PLAYER_INITIAL_POSITION.x * SCALE_FACTOR,
-            map_data.PLAYER_INITIAL_POSITION.y * SCALE_FACTOR);
+            map_data.PLAYER_INITIAL_POSITION.y * SCALE_FACTOR,
+            SCALE_FACTOR);
     platforms = new Platforms(map_data, SCALE_FACTOR).sprites;
     scoreBoard = new Score();
     livesBoard = new Lives();

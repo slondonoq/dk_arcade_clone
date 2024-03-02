@@ -18,11 +18,11 @@ class Player {
     /**
      * Set up the player (mario) sprite
      */
-    constructor(x, y) {
+    constructor(x, y, scale) {
         this.lives = 3;
         this.sprite = new createSprite(x, y);
         // Initial dimensions of the player (mario)
-        this.sprite.scale = 2.5
+        this.sprite.scale = scale
         this.sprite.height = BASE_SPRITE_HEIGHT * this.sprite.scale
         this.sprite.width = BASE_SPRITE_WIDTH * this.sprite.scale
         this.sprite.debug = true
