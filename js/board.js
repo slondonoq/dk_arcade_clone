@@ -7,11 +7,11 @@ preloadBoard = () => {
     numbers_cyan = []
 
     for (let i = 0; i < 10; i++) {
-        numbers_white.push(loadImage(`./assets/misc/number_white_${i}.png`))
-        numbers_blue.push(loadImage(`./assets/misc/number_blue_${i}.png`))
-        numbers_cyan.push(loadImage(`./assets/misc/number_cyan_${i}.png`))
+        numbers_white.push(loadImage(`../assets/misc/number_white_${i}.png`))
+        numbers_blue.push(loadImage(`../assets/misc/number_blue_${i}.png`))
+        numbers_cyan.push(loadImage(`../assets/misc/number_cyan_${i}.png`))
     }
-    icon_life = loadImage('./assets/misc/icon_life.png')
+    icon_life = loadImage('../assets/misc/icon_life.png')
 }
 class Score {
     constructor() {

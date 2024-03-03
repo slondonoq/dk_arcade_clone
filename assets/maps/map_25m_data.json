@@ -4,24 +4,32 @@
     "width": 224
   },
   "PLAYER_INITIAL_POSITION": {
-    "x": 150,
-    "y": 60
+    "x": 100,
+    "y": 44
   },
   "DONKEY_INITIAL_POSITION": {
-    "x": 125,
-    "y": 208
+    "x": 42,
+    "y": 68
   },
   "PRINCESS_INITIAL_POSITION": {
-    "x": 290,
-    "y": 140
+    "x": 96,
+    "y": 44
+  },
+  "HELP_SCREAM_INITIAL_POSITION": {
+    "x": 106,
+    "y": 30
   },
   "SCORE_POSITION": {
     "x": 88,
     "y": 8
   },
   "BARRELS_POSITION": {
-    "x": 35,
-    "y": 200
+    "x": 10,
+    "y": 68
+  },
+  "BARREL_ROLL_START_POSITION": {
+    "x": 60,
+    "y": 68
   },
   "LIVES_POSITION": {
     "x": 8,

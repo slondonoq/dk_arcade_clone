@@ -1,5 +1,5 @@
 let SCALE_FACTOR = 1
-let score = 0
+let score = 100
 let lives = 6
 let pressedKeys = {};
 let listBarrels = [];
@@ -18,74 +18,105 @@ function preload() {
     preloadMario();
     preloadBoard();
 
-    map = loadImage('./assets/maps/map_25m.png')
-    map_data = loadJSON('./assets/maps/map_25m_data.json')
+    map = loadImage('../assets/maps/map_25m.png')
+    map_data = loadJSON('../assets/maps/map_25m_data.json')
 
-    princess = loadAnimation('assets/animations/princess_1.png', 'assets/animations/princess_2.png');
+    princess = loadAnimation('../assets/animations/princess_1.png', 2);
     princess.frameDelay = 15;
-    princess.scale = SCALE_FACTOR * 2.5;
-    donkey = loadAnimation('assets/animations/donkey_1.png', 5);
-    donkey.frameDelay = 20;
-    donkey.scale = SCALE_FACTOR * 2.8;
+    help = loadImage('../assets/misc/help.png');
+    // help.frameDelay = 15;
+    donkey_animation = loadAnimation('../assets/animations/donkey_1.png', 5);
+    donkey_animation.frameDelay = 20;
 
-    barrelAni = loadAnimation('assets/animations/rolling_1.png', 'assets/animations/rolling_2.png', 'assets/animations/rolling_3.png', 'assets/animations/rolling_4.png');
-    barrelAni.scale = SCALE_FACTOR*2.8;
+    barrelAni = loadAnimation('../assets/animations/rolling_1.png', 4);
 }
 
 function setup() {
 
-    SCALE_FACTOR = parseInt((window.innerHeight - 20) / map_data.MAP_DIMENSIONS.height)
+  /* Important! The scale factor calculated below is used to have a better
+     proportion between canvas size and screen, preventing a really small
+     playing space as the sprites are by default made for a canvas of size
+     224x256. Thus, any map placing constants should be calculated by commenting
+     the scale factor line and testing on the default size, then multiplying
+     the amount calculated by the scale factor. An example of this can be seen
+     on the player class builder.
+  */
 
-    player = new Player(map_data.PLAYER_INITIAL_POSITION.x * SCALE_FACTOR,
-            map_data.PLAYER_INITIAL_POSITION.y * SCALE_FACTOR,
-            SCALE_FACTOR);
-    platforms = new Platforms(map_data, SCALE_FACTOR).sprites;
-    scoreBoard = new Score();
-    livesBoard = new Lives();
+  SCALE_FACTOR = parseInt((window.innerHeight - 20) / map_data.MAP_DIMENSIONS.height)
 
+  player = new Player(map_data.PLAYER_INITIAL_POSITION.x * SCALE_FACTOR,
+          map_data.PLAYER_INITIAL_POSITION.y * SCALE_FACTOR,
+          SCALE_FACTOR);
 
-    setUpBarrelsStock();
-    createBarrel();
+  princess.scale = SCALE_FACTOR;
 
-    createCanvas(
-        map_data.MAP_DIMENSIONS.width * SCALE_FACTOR,
-        map_data.MAP_DIMENSIONS.height * SCALE_FACTOR
-    )
-    //World related
-    world.gravity.y = 10;
-    border = new Sprite(
-        map_data.MAP_DIMENSIONS.width * SCALE_FACTOR / 2,
-        map_data.MAP_DIMENSIONS.height * SCALE_FACTOR / 2,
-        map_data.MAP_DIMENSIONS.width * SCALE_FACTOR + 2,
-        map_data.MAP_DIMENSIONS.height * SCALE_FACTOR + 2,
-        's'
-    );
-    border.shape = 'chain';
+  platforms = new Platforms(map_data, SCALE_FACTOR).sprites;
+  scoreBoard = new Score();
+  livesBoard = new Lives();
 
 
-    help = createSprite(360, 115);
-    help.scale = SCALE_FACTOR;
-    help.addImage('assets/misc/help.png');
-    help.immovable = true;
-    help.collider = 'none';
+  setUpBarrelsStock();
+
+  //Donkey related
+  //TODO: move code
+  donkey = new Sprite()
+  donkey.x = map_data.DONKEY_INITIAL_POSITION.x*SCALE_FACTOR
+  donkey.y = map_data.DONKEY_INITIAL_POSITION.y*SCALE_FACTOR
+  donkey.ani = donkey_animation
+  donkey.scale = SCALE_FACTOR
+  //TODO: put these values into constants
+  donkey.h = 32*SCALE_FACTOR
+  donkey.w = 46*SCALE_FACTOR
+  donkey.collider = 'static' 
+
+
+  createBarrel();
+
+  createCanvas(
+      map_data.MAP_DIMENSIONS.width * SCALE_FACTOR,
+      map_data.MAP_DIMENSIONS.height * SCALE_FACTOR
+  )
+  //World related
+  world.gravity.y = 10;
+  border = new Sprite(
+      map_data.MAP_DIMENSIONS.width * SCALE_FACTOR / 2,
+      map_data.MAP_DIMENSIONS.height * SCALE_FACTOR / 2,
+      map_data.MAP_DIMENSIONS.width * SCALE_FACTOR + 2,
+      map_data.MAP_DIMENSIONS.height * SCALE_FACTOR + 2,
+      's'
+  );
+  border.shape = 'chain';
+
+
+  // help = createSprite(360, 115);
+  // help.scale = SCALE_FACTOR;
+  // help.addImage('assets/misc/help.png');
+  // help.immovable = true;
+  // help.collider = 'none';
 
 }
 
 function draw() {
+  // * Pay attention to the update order, as updates that
+  // * are done before the background may be overwritten
+  background(map);
+  player.update();
+  scoreBoard.update();
+  livesBoard.update();
 
-    player.update();
-    scoreBoard.update();
-    livesBoard.update();
+  animation(princess, map_data.PRINCESS_INITIAL_POSITION.x*SCALE_FACTOR, map_data.PRINCESS_INITIAL_POSITION.y*SCALE_FACTOR);
+  //Of every 120 frames, paint the image 60 (half on-off)
+  if(frameCount%120 < 60){ 
+    image(
+      help,
+      map_data.HELP_SCREAM_INITIAL_POSITION.x*SCALE_FACTOR,
+      map_data.HELP_SCREAM_INITIAL_POSITION.y*SCALE_FACTOR,
+      23*SCALE_FACTOR,
+      8*SCALE_FACTOR
+    )
+  }
 
-    background(map);
-    animation(princess, map_data.PRINCESS_INITIAL_POSITION.x, map_data.PRINCESS_INITIAL_POSITION.y);
-    animation(donkey, map_data.DONKEY_INITIAL_POSITION.x, map_data.DONKEY_INITIAL_POSITION.y);
-
-    for (let i = listBarrels.length - 1; i >= 0; i--) {
-        listBarrels[i].update();
-    }
+  for (let i = listBarrels.length - 1; i >= 0; i--) {
+    listBarrels[i].update();
+  }
 }
-
-
-
-

@@ -112,6 +112,7 @@ class Player {
     }
 
     checkDeath = () => {
+        //TODO: properly detect collisions
         if (this.sprite.colliding(barrels) > 0) {
             this.loseLife()
         }
