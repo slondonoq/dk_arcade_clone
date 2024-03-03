@@ -2,7 +2,7 @@ let SCALE_FACTOR = 1
 let score = 100
 let lives = 6
 let pressedKeys = {};
-let listBarrels = [];
+let listBarrels;
 function keyPressed() {
   pressedKeys[key] = true;
   if(key === 'L') {
@@ -42,7 +42,7 @@ function setup() {
      on the player class builder.
   */
 
-  SCALE_FACTOR = parseInt((window.innerHeight - 20) / map_data.MAP_DIMENSIONS.height)
+  // SCALE_FACTOR = parseInt((window.innerHeight - 20) / map_data.MAP_DIMENSIONS.height)
 
   player = new Player(map_data.PLAYER_INITIAL_POSITION.x * SCALE_FACTOR,
           map_data.PLAYER_INITIAL_POSITION.y * SCALE_FACTOR,
@@ -50,10 +50,20 @@ function setup() {
 
   princess.scale = SCALE_FACTOR;
 
-  platforms = new Platforms(map_data, SCALE_FACTOR).sprites;
+  platformGroup = new Platforms(map_data, SCALE_FACTOR);
+  platforms = platformGroup.sprites;
+  overlappable_platforms = platformGroup.overlappable;
+  ladders = new Ladders(map_data, SCALE_FACTOR).sprites;
   scoreBoard = new Score();
   livesBoard = new Lives();
+  listBarrels = new Group();
 
+  // Setting overlapping callbacks
+  player.sprite.overlaps(ladders, () => player.setPlayerOnLadder(true))
+  player.sprite.overlapped(ladders, () => player.setPlayerOnLadder(false))
+
+  //TODO: allow barrels to randomly go down ladders by adding function as param
+  listBarrels.overlaps(ladders)
 
   setUpBarrelsStock();
 
@@ -86,14 +96,6 @@ function setup() {
       's'
   );
   border.shape = 'chain';
-
-
-  // help = createSprite(360, 115);
-  // help.scale = SCALE_FACTOR;
-  // help.addImage('assets/misc/help.png');
-  // help.immovable = true;
-  // help.collider = 'none';
-
 }
 
 function draw() {

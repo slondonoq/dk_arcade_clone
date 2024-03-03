@@ -61,9 +61,9 @@ class Lives {
     update() {
         push()
         for (let i = 0; i < 6; i++) {
-            if (lives > i) {
+            if (player.lives > i) {
                 image(
-                    lives > i ? icon_life : black_square,
+                    player.lives > i ? icon_life : black_square,
                     map_data.LIVES_POSITION.x * SCALE_FACTOR + 8 * i * SCALE_FACTOR,
                     map_data.LIVES_POSITION.y * SCALE_FACTOR,
                     8 * SCALE_FACTOR,

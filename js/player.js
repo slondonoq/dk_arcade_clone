@@ -34,8 +34,9 @@ class Player {
         this.sprite.addAni('jumping', animation_jump)
         this.sprite.addAni('stand', animation_stand)
         this.sprite.mirror.x = true
-
+        // Flags for movement mechanics
         this.isPlayerOnTheGround = true;
+        this.isPlayerOnLadder = false;
     }
 
     loseLife() {
@@ -65,7 +66,24 @@ class Player {
             this.sprite.mirror.x = true;
             this.sprite.vel.x = 0.5;
         }
-        // Jump the player
+        // TODO: add animation and check if preventing gravity is possible (stay hanged on ladder)
+        // Move the player up a ladder
+        if (pressedKeys['W'] && this.isPlayerOnLadder) {
+            // Allow player to go through certain platforms
+            this.sprite.overlaps(overlappable_platforms)
+            mvmt.y -= 2
+            this.sprite.velocity.y = -0.5;
+        }
+        // Move the player down a ladder
+        else if (pressedKeys['S'] && this.isPlayerOnLadder) {
+            // Allow player to go through certain platforms
+            this.sprite.overlaps(overlappable_platforms)
+            mvmt.y += 2
+            this.sprite.velocity.y = -0.5;
+        }
+        // Remove ability to go through platforms if player is not on a ladder
+        else if (!this.isPlayerOnLadder) this.sprite.collides(overlappable_platforms)
+        // Player jumps
         if (pressedKeys[' '] && this.isPlayerOnTheGround) {
             this.sprite.changeAni('jumping');
             this.sprite.velocity.y = -4;
@@ -82,14 +100,15 @@ class Player {
         this.sprite.position.x += mvmt.x;
         this.sprite.position.y += mvmt.y;
 
-
+        
         // Check if the player is out of bounds
         this.checkOutOfBounds();
 
         // Check if the player is dead
         if (this.lives < 1) {
-            player.sprite.changeAni('death')
+            this.sprite.changeAni('death')
         }
+
     }
 
     /**
@@ -116,6 +135,10 @@ class Player {
         if (this.sprite.colliding(barrels) > 0) {
             this.loseLife()
         }
+    }
+
+    setPlayerOnLadder = (isOnLadder) => {
+        this.isPlayerOnLadder = isOnLadder
     }
 
     /**

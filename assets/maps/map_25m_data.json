@@ -4,8 +4,8 @@
     "width": 224
   },
   "PLAYER_INITIAL_POSITION": {
-    "x": 100,
-    "y": 44
+    "x": 10,
+    "y": 234
   },
   "DONKEY_INITIAL_POSITION": {
     "x": 42,
@@ -431,6 +431,128 @@
       "y": 60,
       "height": 4,
       "width": 47
+    }
+  ],
+  "LADDERS": [
+    {
+      "x": 84,
+      "y": 218,
+      "width": 2,
+      "height": 10
+    },
+    {
+      "x": 84,
+      "y": 244,
+      "width": 2,
+      "height": 8
+    },
+    {
+      "x": 188,
+      "y": 226,
+      "width": 2,
+      "height": 14
+    },
+    {
+      "x": 100,
+      "y": 194,
+      "width": 2,
+      "height": 24
+    },
+    {
+      "x": 36,
+      "y": 196,
+      "width": 2,
+      "height": 20
+    },
+    {
+      "x": 36,
+      "y": 196,
+      "width": 2,
+      "height": 20
+    },
+    {
+      "x": 68,
+      "y": 182,
+      "width": 2,
+      "height": 8
+    },
+    {
+      "x": 68,
+      "y": 152,
+      "width": 2,
+      "height": 14
+    },
+    {
+      "x": 116,
+      "y": 160,
+      "width": 2,
+      "height": 22
+    },
+    {
+      "x": 188,
+      "y": 161,
+      "width": 2,
+      "height": 16
+    },
+    {
+      "x": 172,
+      "y": 148,
+      "width": 2,
+      "height": 8
+    },
+    {
+      "x": 76,
+      "y": 128,
+      "width": 2,
+      "height": 20
+    },
+    {
+      "x": 36,
+      "y": 128,
+      "width": 2,
+      "height": 16
+    },
+    {
+      "x": 172,
+      "y": 120,
+      "width": 2,
+      "height": 16
+    },
+    {
+      "x": 92,
+      "y": 112,
+      "width": 2,
+      "height": 12
+    },
+    {
+      "x": 92,
+      "y": 90,
+      "width": 2,
+      "height": 12
+    },
+    {
+      "x": 188,
+      "y": 95,
+      "width": 2,
+      "height": 16
+    },
+    {
+      "x": 132,
+      "y": 65,
+      "width": 2,
+      "height": 20
+    },
+    {
+      "x": 84,
+      "y": 52,
+      "width": 2,
+      "height": 40
+    },
+    {
+      "x": 68,
+      "y": 52,
+      "width": 2,
+      "height": 40
     }
   ]
 }
