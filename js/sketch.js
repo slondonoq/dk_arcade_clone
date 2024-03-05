@@ -26,7 +26,7 @@ function preload() {
     help = loadImage('../assets/misc/help.png');
     // help.frameDelay = 15;
     donkey_animation = loadAnimation('../assets/animations/donkey_1.png', 5);
-    donkey_animation.frameDelay = 20;
+    donkey_animation.frameDelay = 45;
 
     barrelAni = loadAnimation('../assets/animations/rolling_1.png', 4);
 }
@@ -78,10 +78,10 @@ function setup() {
   donkey.h = 32*SCALE_FACTOR
   donkey.w = 46*SCALE_FACTOR
   donkey.collider = 'static' 
-
-
-  createBarrel();
-
+  setTimeout(() => {  
+    setInterval(createBarrel, 4000);
+  }
+  , 1300);
   createCanvas(
       map_data.MAP_DIMENSIONS.width * SCALE_FACTOR,
       map_data.MAP_DIMENSIONS.height * SCALE_FACTOR
@@ -117,8 +117,5 @@ function draw() {
       8*SCALE_FACTOR
     )
   }
-
-  for (let i = listBarrels.length - 1; i >= 0; i--) {
-    listBarrels[i].update();
-  }
+  
 }
