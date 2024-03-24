@@ -109,6 +109,11 @@ class Player {
             this.sprite.changeAni('death')
         }
 
+        if (this.sprite.collides(listBarrels)){
+            
+            this.loseLife();
+            
+        }
     }
 
     /**
@@ -134,6 +139,7 @@ class Player {
         //TODO: properly detect collisions
         if (this.sprite.colliding(barrels) > 0) {
             this.loseLife()
+            
         }
     }
 

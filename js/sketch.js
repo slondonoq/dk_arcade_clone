@@ -1,8 +1,9 @@
 let SCALE_FACTOR = 1
 let score = 100
-let lives = 6
+let lives = 3
 let pressedKeys = {};
 let listBarrels;
+
 function keyPressed() {
   pressedKeys[key] = true;
   if(key === 'L') {
@@ -15,11 +16,12 @@ function keyReleased() {
 // This function is used to load an animation from a sequence of images
 function preload() {
 
+    map = loadImage('../assets/maps/map_25m.png')
+    map_data = loadJSON('../assets/maps/map_25m_data.json')
+    console.log(map_data.PLAYER_INITIAL_POSITION);
     preloadMario();
     preloadBoard();
 
-    map = loadImage('../assets/maps/map_25m.png')
-    map_data = loadJSON('../assets/maps/map_25m_data.json')
 
     princess = loadAnimation('../assets/animations/princess_1.png', 2);
     princess.frameDelay = 15;
@@ -29,6 +31,7 @@ function preload() {
     donkey_animation.frameDelay = 45;
 
     barrelAni = loadAnimation('../assets/animations/rolling_1.png', 4);
+    gameOver = loadImage('../assets/misc/GameOver.png')
 }
 
 function setup() {
@@ -43,7 +46,9 @@ function setup() {
   */
 
   // SCALE_FACTOR = parseInt((window.innerHeight - 20) / map_data.MAP_DIMENSIONS.height)
-
+  
+  console.log(map_data.PLAYER_INITIAL_POSITION
+    );
   player = new Player(map_data.PLAYER_INITIAL_POSITION.x * SCALE_FACTOR,
           map_data.PLAYER_INITIAL_POSITION.y * SCALE_FACTOR,
           SCALE_FACTOR);
@@ -56,7 +61,7 @@ function setup() {
   ladders = new Ladders(map_data, SCALE_FACTOR).sprites;
   scoreBoard = new Score();
   livesBoard = new Lives();
-  listBarrels = new Group();
+  listBarrels = new Group(); 
 
   // Setting overlapping callbacks
   player.sprite.overlaps(ladders, () => player.setPlayerOnLadder(true))
@@ -78,10 +83,17 @@ function setup() {
   donkey.h = 32*SCALE_FACTOR
   donkey.w = 46*SCALE_FACTOR
   donkey.collider = 'static' 
-  setTimeout(() => {  
-    setInterval(createBarrel, 4000);
+  if(player.lives > 0){
+    
+    setTimeout(() => {  
+      setInterval(createBarrel, 4000);
+    }
+    , 1300);
   }
-  , 1300);
+  
+  
+    // Período de tiempo entre 2 y 7 segundos
+
   createCanvas(
       map_data.MAP_DIMENSIONS.width * SCALE_FACTOR,
       map_data.MAP_DIMENSIONS.height * SCALE_FACTOR
@@ -105,6 +117,7 @@ function draw() {
   player.update();
   scoreBoard.update();
   livesBoard.update();
+  listBarrels.update();
 
   animation(princess, map_data.PRINCESS_INITIAL_POSITION.x*SCALE_FACTOR, map_data.PRINCESS_INITIAL_POSITION.y*SCALE_FACTOR);
   //Of every 120 frames, paint the image 60 (half on-off)
@@ -117,5 +130,16 @@ function draw() {
       8*SCALE_FACTOR
     )
   }
-  
+  if(player.lives <= 0){
+ 
+    image(
+      gameOver,
+      20 * SCALE_FACTOR,
+      map_data.MAP_DIMENSIONS.height/3 * SCALE_FACTOR,
+      map_data.MAP_DIMENSIONS.width-20 * SCALE_FACTOR,
+      map_data.MAP_DIMENSIONS.height/2 * SCALE_FACTOR
+    )
+  }
 }
+
+
