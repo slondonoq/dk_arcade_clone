@@ -3,6 +3,12 @@
     "height": 256,
     "width": 224
   },
+  "GAME_OVER":{
+    "x": 18, 
+    "y": 112,
+    "width": 200,
+    "height": 75
+  },
   "PLAYER_INITIAL_POSITION": {
     "x": 10,
     "y": 234

@@ -12,6 +12,7 @@ preloadMario = () => {
     animation_death = loadAni('./assets/animations/player_death_1.png', 2)
     animation_death.frameDelay = 40;
     animation_stand = loadAni('./assets/animations/player_walk_1.png')
+    animation_climb = loadAni('./assets/animations/player_climb_1.png', 2)
 }
 
 class Player {
@@ -33,14 +34,20 @@ class Player {
         this.sprite.addAni('walker', animation_walk)
         this.sprite.addAni('jumping', animation_jump)
         this.sprite.addAni('stand', animation_stand)
+        this.sprite.addAni('climb', animation_climb)
         this.sprite.mirror.x = true
         // Flags for movement mechanics
         this.isPlayerOnTheGround = true;
-        this.isPlayerOnLadder = false;
+        this.isPlayerOnLadder = false; 
     }
 
     loseLife() {
         this.lives -= 1
+        if(this.lives>=1){
+            this.sprite.position.x = map_data.PLAYER_INITIAL_POSITION.x * SCALE_FACTOR
+            this.sprite.position.y = map_data.PLAYER_INITIAL_POSITION.y * SCALE_FACTOR
+            listBarrels.removeAll();
+        }  // Remove all barrels from the screen        
     }
 
     /**
@@ -72,6 +79,7 @@ class Player {
             // Allow player to go through certain platforms
             this.sprite.overlaps(overlappable_platforms)
             mvmt.y -= 2
+            this.sprite.changeAni('climb');
             this.sprite.velocity.y = -0.5;
         }
         // Move the player down a ladder

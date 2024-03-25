@@ -133,10 +133,10 @@ function draw() {
     listBarrels.removeAll();                 
     image(    
       gameOver,
-      20 * SCALE_FACTOR,
-      map_data.MAP_DIMENSIONS.height/3 * SCALE_FACTOR,
-      map_data.MAP_DIMENSIONS.width-20 * SCALE_FACTOR,
-      map_data.MAP_DIMENSIONS.height/2 * SCALE_FACTOR
+      map_data.GAME_OVER.x*SCALE_FACTOR,
+      map_data.GAME_OVER.y*SCALE_FACTOR,
+      map_data.GAME_OVER.width*SCALE_FACTOR,
+      map_data.GAME_OVER.height*SCALE_FACTOR, 
     )
   }
 }
