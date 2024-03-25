@@ -62,6 +62,7 @@ function setup() {
   scoreBoard = new Score();
   livesBoard = new Lives();
   listBarrels = new Group(); 
+  listBarrels.life = 1070;   
 
   // Setting overlapping callbacks
   player.sprite.overlaps(ladders, () => player.setPlayerOnLadder(true))
@@ -83,17 +84,13 @@ function setup() {
   donkey.h = 32*SCALE_FACTOR
   donkey.w = 46*SCALE_FACTOR
   donkey.collider = 'static' 
-  if(player.lives > 0){
+  
     
-    setTimeout(() => {  
-      setInterval(createBarrel, 4000);
-    }
-    , 1300);
+  setTimeout(() => {  
+    setInterval(createBarrel, 4000);
   }
+  , 1300);
   
-  
-    // Período de tiempo entre 2 y 7 segundos
-
   createCanvas(
       map_data.MAP_DIMENSIONS.width * SCALE_FACTOR,
       map_data.MAP_DIMENSIONS.height * SCALE_FACTOR
@@ -121,7 +118,7 @@ function draw() {
 
   animation(princess, map_data.PRINCESS_INITIAL_POSITION.x*SCALE_FACTOR, map_data.PRINCESS_INITIAL_POSITION.y*SCALE_FACTOR);
   //Of every 120 frames, paint the image 60 (half on-off)
-  if(frameCount%120 < 60){ 
+  if(frameCount%120 < 60 && player.lives > 0){ 
     image(
       help,
       map_data.HELP_SCREAM_INITIAL_POSITION.x*SCALE_FACTOR,
@@ -131,8 +128,10 @@ function draw() {
     )
   }
   if(player.lives <= 0){
- 
-    image(
+    donkey.ani.pause();
+    princess.pause();
+    listBarrels.removeAll();                 
+    image(    
       gameOver,
       20 * SCALE_FACTOR,
       map_data.MAP_DIMENSIONS.height/3 * SCALE_FACTOR,
