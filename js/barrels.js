@@ -18,7 +18,7 @@ setUpBarrelsStock = () => {
 }
 
 class Barrel {
-  constructor(speed, group) {
+  constructor(group) {
     this.sprite = new group.Sprite();
     this.sprite.x = map_data.BARREL_ROLL_START_POSITION.x*SCALE_FACTOR
     this.sprite.y = map_data.BARREL_ROLL_START_POSITION.y*SCALE_FACTOR
@@ -27,7 +27,7 @@ class Barrel {
     this.sprite.w = 12*SCALE_FACTOR
     this.sprite.diameter = 12*SCALE_FACTOR;
     this.sprite.animation = barrelAni;
-    this.sprite.animation.frameDelay = 20-speed;
+    this.sprite.animation.frameDelay = 20-2;
     this.sprite.vel.x = 3;
     this.sprite.rotationLock=false;
     this.sprite.debug = true;
@@ -58,5 +58,5 @@ function createBarrel() {
   //* Left line below commented just in case the new barrel
   //* group gives problems in the future
   // listBarrels.push(new Barrel(2));
-  new Barrel(2, listBarrels);
+  new Barrel(listBarrels);
 }

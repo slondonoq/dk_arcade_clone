@@ -21,6 +21,7 @@ class Player {
      */
     constructor(x, y, scale) {
         this.lives = 3;
+        this.win = false;
         this.sprite = new createSprite(x, y);
         // Initial dimensions of the player (mario)
         this.sprite.scale = scale
@@ -28,7 +29,7 @@ class Player {
         this.sprite.width = BASE_SPRITE_WIDTH * this.sprite.scale
         this.sprite.debug = true
         this.sprite.rotationLock = true
-
+        
         // Adding all the animations to the player (mario)
         this.sprite.addAni('death', animation_death)
         this.sprite.addAni('walker', animation_walk)
@@ -47,6 +48,7 @@ class Player {
             this.sprite.position.x = map_data.PLAYER_INITIAL_POSITION.x * SCALE_FACTOR
             this.sprite.position.y = map_data.PLAYER_INITIAL_POSITION.y * SCALE_FACTOR
             listBarrels.removeAll();
+
         }  // Remove all barrels from the screen        
     }
 
@@ -116,11 +118,13 @@ class Player {
         if (this.lives < 1) {
             this.sprite.changeAni('death')
         }
-
+        // check if the player coliides with barrels
         if (this.sprite.collides(listBarrels)){
-            
             this.loseLife();
-            
+        }
+        if (this.sprite.collides(princess)){
+            this.win = true;
+            console.log("win ")      
         }
     }
 

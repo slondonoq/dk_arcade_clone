@@ -23,8 +23,8 @@ function preload() {
     preloadBoard();
 
 
-    princess = loadAnimation('../assets/animations/princess_1.png', 2);
-    princess.frameDelay = 15;
+    princessAni = loadAnimation('../assets/animations/princess_1.png', 2);
+    princessAni.frameDelay = 15;
     help = loadImage('../assets/misc/help.png');
     // help.frameDelay = 15;
     donkey_animation = loadAnimation('../assets/animations/donkey_1.png', 5);
@@ -32,6 +32,7 @@ function preload() {
 
     barrelAni = loadAnimation('../assets/animations/rolling_1.png', 4);
     gameOver = loadImage('../assets/misc/GameOver.png')
+    win = loadImage('../assets/misc/win.png')
 }
 
 function setup() {
@@ -53,7 +54,7 @@ function setup() {
           map_data.PLAYER_INITIAL_POSITION.y * SCALE_FACTOR,
           SCALE_FACTOR);
 
-  princess.scale = SCALE_FACTOR;
+  princessAni.scale = SCALE_FACTOR; 
 
   platformGroup = new Platforms(map_data, SCALE_FACTOR);
   platforms = platformGroup.sprites;
@@ -85,12 +86,18 @@ function setup() {
   donkey.w = 46*SCALE_FACTOR
   donkey.collider = 'static' 
   
+  princess = new Sprite()
+  princess.x = map_data.PRINCESS_INITIAL_POSITION.x*SCALE_FACTOR
+  princess.y = map_data.PRINCESS_INITIAL_POSITION.y*SCALE_FACTOR
+  princess.ani = princessAni
+  princess.scale = SCALE_FACTOR
+  princess.debug = true;
     
   setTimeout(() => {  
-    setInterval(createBarrel, 4000);
+    setInterval(createBarrel, 5000);
   }
-  , 1300);
-  
+  , 1300); 
+        
   createCanvas(
       map_data.MAP_DIMENSIONS.width * SCALE_FACTOR,
       map_data.MAP_DIMENSIONS.height * SCALE_FACTOR
@@ -116,9 +123,9 @@ function draw() {
   livesBoard.update();
   listBarrels.update();
 
-  animation(princess, map_data.PRINCESS_INITIAL_POSITION.x*SCALE_FACTOR, map_data.PRINCESS_INITIAL_POSITION.y*SCALE_FACTOR);
+  
   //Of every 120 frames, paint the image 60 (half on-off)
-  if(frameCount%120 < 60 && player.lives > 0){ 
+  if(frameCount%120 < 60 && player.lives > 0 && !player.win){ 
     image(
       help,
       map_data.HELP_SCREAM_INITIAL_POSITION.x*SCALE_FACTOR,
@@ -129,16 +136,26 @@ function draw() {
   }
   if(player.lives <= 0){
     donkey.ani.pause();
-    princess.pause();
-    listBarrels.removeAll();                 
+    princess.ani.pause();   
+    listBarrels.removeAll();                
     image(    
       gameOver,
-      map_data.GAME_OVER.x*SCALE_FACTOR,
-      map_data.GAME_OVER.y*SCALE_FACTOR,
-      map_data.GAME_OVER.width*SCALE_FACTOR,
-      map_data.GAME_OVER.height*SCALE_FACTOR, 
+      map_data.FINAL_BANNER.x*SCALE_FACTOR,
+      map_data.FINAL_BANNER.y*SCALE_FACTOR,
+      map_data.FINAL_BANNER.width*SCALE_FACTOR,
+      map_data.FINAL_BANNER.height*SCALE_FACTOR, 
+    )
+  }
+  if(player.win){
+    donkey.ani.pause();
+    princess.ani.pause();
+    listBarrels.removeAll();                
+    image(    
+      win,
+      map_data.FINAL_BANNER.x*SCALE_FACTOR,
+      map_data.FINAL_BANNER.y*SCALE_FACTOR,
+      map_data.FINAL_BANNER.width*SCALE_FACTOR,
+      map_data.FINAL_BANNER.height*SCALE_FACTOR, 
     )
   }
 }
-
-
