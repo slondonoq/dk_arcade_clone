@@ -1,170 +1,186 @@
-const BASE_STEP_DISTANCE = 0.1
-const BASE_SPRITE_WIDTH = 16
-const BASE_SPRITE_HEIGHT = 15
-const BASE_JUMP_FORCE = 2
+const BASE_STEP_DISTANCE = 0.1;
+const BASE_SPRITE_WIDTH = 16;
+const BASE_SPRITE_HEIGHT = 15;
+const BASE_JUMP_FORCE = 2;
 /**
  * Load the animations for the player (mario)
  */
 preloadMario = () => {
-    animation_jump = loadAni('assets/animations/player_jump_1.png', 'assets/animations/player_jump_2.png')
-    animation_jump.frameDelay = 20;
-    animation_walk = loadAni('./assets/animations/player_walk_1.png', 3)
-    animation_death = loadAni('./assets/animations/player_death_1.png', 2)
-    animation_death.frameDelay = 40;
-    animation_stand = loadAni('./assets/animations/player_walk_1.png')
-    animation_climb = loadAni('./assets/animations/player_climb_1.png', 2)
-}
+  animation_jump = loadAni(
+    "assets/animations/player_jump_1.png",
+    "assets/animations/player_jump_2.png"
+  );
+  animation_jump.frameDelay = 20;
+  animation_walk = loadAni("./assets/animations/player_walk_1.png", 3);
+  animation_death = loadAni("./assets/animations/player_death_1.png", 2);
+  animation_death.frameDelay = 40;
+  animation_stand = loadAni("./assets/animations/player_walk_1.png");
+  animation_climb = loadAni("./assets/animations/player_climb_1.png", 2);
+};
 
 class Player {
-    /**
-     * Set up the player (mario) sprite
-     */
-    constructor(x, y, scale) {
-        this.lives = 3;
-        this.win = false;
-        this.sprite = new createSprite(x, y);
-        // Initial dimensions of the player (mario)
-        this.sprite.scale = scale
-        this.sprite.height = BASE_SPRITE_HEIGHT * this.sprite.scale
-        this.sprite.width = BASE_SPRITE_WIDTH * this.sprite.scale
-        this.sprite.debug = true
-        this.sprite.rotationLock = true
-        
-        // Adding all the animations to the player (mario)
-        this.sprite.addAni('death', animation_death)
-        this.sprite.addAni('walker', animation_walk)
-        this.sprite.addAni('jumping', animation_jump)
-        this.sprite.addAni('stand', animation_stand)
-        this.sprite.addAni('climb', animation_climb)
-        this.sprite.mirror.x = true
-        // Flags for movement mechanics
-        this.isPlayerOnTheGround = true;
-        this.isPlayerOnLadder = false; 
+  /**
+   * Set up the player (mario) sprite
+   */
+  constructor(x, y, scale) {
+    this.lives = 3;
+    this.win = false;
+    this.sprite = new createSprite(x, y);
+    // Initial dimensions of the player (mario)
+    this.sprite.scale = scale;
+    this.sprite.height = BASE_SPRITE_HEIGHT * this.sprite.scale;
+    this.sprite.width = BASE_SPRITE_WIDTH * this.sprite.scale;
+    this.sprite.debug = true;
+    this.sprite.rotationLock = true;
+
+    // Adding all the animations to the player (mario)
+    this.sprite.addAni("death", animation_death);
+    this.sprite.addAni("walker", animation_walk);
+    this.sprite.addAni("jumping", animation_jump);
+    this.sprite.addAni("stand", animation_stand);
+    this.sprite.addAni("climb", animation_climb);
+    this.sprite.mirror.x = true;
+    // Flags for movement mechanics
+    this.isPlayerOnTheGround = true;
+    this.isPlayerOnLadder = false;
+  }
+
+  loseLife() {
+    this.lives -= 1;
+    if (this.lives >= 1) {
+      this.sprite.position.x =
+        map_data.PLAYER_INITIAL_POSITION.x * SCALE_FACTOR;
+      this.sprite.position.y =
+        map_data.PLAYER_INITIAL_POSITION.y * SCALE_FACTOR;
+      listBarrels.removeAll();
+    } // Remove all barrels from the screen
+  }
+
+  /**
+   * Update the player's position and animations
+   */
+  update() {
+    let mvmt = createVector(0, 0);
+
+    this.isPlayerOnTheGround = this.sprite.colliding(platforms) > 1;
+
+    // Move the player to the left
+    if (pressedKeys["A"]) {
+      mvmt.x -= 1;
+      this.sprite.changeAni("walker");
+      this.sprite.mirror.x = false;
+      this.sprite.vel.x = -0.5;
+    }
+    // Move the player to the right
+    if (pressedKeys["D"]) {
+      mvmt.x += 1;
+      this.sprite.changeAni("walker");
+      this.sprite.mirror.x = true;
+      this.sprite.vel.x = 0.5;
+    }
+    // TODO: add animation and check if preventing gravity is possible (stay hanged on ladder)
+    // Move the player up a ladder
+    if (pressedKeys["W"] && this.isPlayerOnLadder) {
+      // Allow player to go through certain platforms
+      this.sprite.overlaps(overlappable_platforms);
+      mvmt.y -= 2;
+      this.sprite.changeAni("climb");
+      this.sprite.velocity.y = -0.5;
+    }
+    // Move the player down a ladder
+    else if (pressedKeys["S"] && this.isPlayerOnLadder) {
+      // Allow player to go through certain platforms
+      this.sprite.overlaps(overlappable_platforms);
+      mvmt.y += 2;
+      this.sprite.velocity.y = -0.5;
+    }
+    // Remove ability to go through platforms if player is not on a ladder
+    else if (!this.isPlayerOnLadder)
+      this.sprite.collides(overlappable_platforms);
+    // Player jumps
+    if (pressedKeys[" "] && this.isPlayerOnTheGround) {
+      this.sprite.changeAni("jumping");
+      this.sprite.velocity.y = -4;
+      this.checkJump();
     }
 
-    loseLife() {
-        this.lives -= 1
-        if(this.lives>=1){
-            this.sprite.position.x = map_data.PLAYER_INITIAL_POSITION.x * SCALE_FACTOR
-            this.sprite.position.y = map_data.PLAYER_INITIAL_POSITION.y * SCALE_FACTOR
-            listBarrels.removeAll();
-
-        }  // Remove all barrels from the screen        
+    // If the player is not moving and is on the ground, change the animation to standing
+    if (!this.isMoving() && this.isPlayerOnTheGround) {
+      this.sprite.changeAni("stand");
     }
 
-    /**
-     * Update the player's position and animations
-     */
-    update() {
+    // Prevent to make diagonal movements faster than horizontal ones
+    mvmt.setMag(2.5);
 
-        let mvmt = createVector(0, 0);
+    this.sprite.position.x += mvmt.x;
+    this.sprite.position.y += mvmt.y;
 
-        this.isPlayerOnTheGround = this.sprite.colliding(platforms) > 1;
+    // Check if the player is out of bounds
+    this.checkOutOfBounds();
 
-        // Move the player to the left
-        if (pressedKeys['A']) {
-            mvmt.x -= 1
-            this.sprite.changeAni('walker')
-            this.sprite.mirror.x = false;
-            this.sprite.vel.x = -0.5;
-        }
-        // Move the player to the right
-        if (pressedKeys['D']) {
-            mvmt.x += 1
-            this.sprite.changeAni('walker')
-            this.sprite.mirror.x = true;
-            this.sprite.vel.x = 0.5;
-        }
-        // TODO: add animation and check if preventing gravity is possible (stay hanged on ladder)
-        // Move the player up a ladder
-        if (pressedKeys['W'] && this.isPlayerOnLadder) {
-            // Allow player to go through certain platforms
-            this.sprite.overlaps(overlappable_platforms)
-            mvmt.y -= 2
-            this.sprite.changeAni('climb');
-            this.sprite.velocity.y = -0.5;
-        }
-        // Move the player down a ladder
-        else if (pressedKeys['S'] && this.isPlayerOnLadder) {
-            // Allow player to go through certain platforms
-            this.sprite.overlaps(overlappable_platforms)
-            mvmt.y += 2
-            this.sprite.velocity.y = -0.5;
-        }
-        // Remove ability to go through platforms if player is not on a ladder
-        else if (!this.isPlayerOnLadder) this.sprite.collides(overlappable_platforms)
-        // Player jumps
-        if (pressedKeys[' '] && this.isPlayerOnTheGround) {
-            this.sprite.changeAni('jumping');
-            this.sprite.velocity.y = -4;
-        }
-
-        // If the player is not moving and is on the ground, change the animation to standing
-        if (!this.isMoving() && this.isPlayerOnTheGround) {
-            this.sprite.changeAni('stand')
-        }
-
-        // Prevent to make diagonal movements faster than horizontal ones
-        mvmt.setMag(2.5);
-
-        this.sprite.position.x += mvmt.x;
-        this.sprite.position.y += mvmt.y;
-
-        
-        // Check if the player is out of bounds
-        this.checkOutOfBounds();
-
-        // Check if the player is dead
-        if (this.lives < 1) {
-            this.sprite.changeAni('death')
-        }
-        // check if the player coliides with barrels
-        if (this.sprite.collides(listBarrels)){
-            this.loseLife();
-        }
-        if (this.sprite.collides(princess)){
-            this.win = true;
-            console.log("win ")      
-        }
+    // Check if the player is dead
+    if (this.lives < 1) {
+      this.sprite.changeAni("death");
     }
-
-    /**
-     * Prevent the player from grap the borders of the screen
-     * @returns {Boolean}
-     */
-    checkOutOfBounds = () => {
-
-        if (this.sprite.colliding(border) > 0) {
-            console.log('colliding')
-
-            if (this.sprite.mirror.x == true) {
-                this.sprite.vel.x -= 0.5;
-            } else {
-                this.sprite.vel.x += 0.5;
-            }
-
-        }
-
+    // check if the player coliides with barrels
+    if (this.sprite.collides(listBarrels)) {
+      this.loseLife();
     }
-
-    checkDeath = () => {
-        //TODO: properly detect collisions
-        if (this.sprite.colliding(barrels) > 0) {
-            this.loseLife()
-            
-        }
+    if (this.sprite.collides(princess)) {
+      this.win = true;
+      console.log("win ");
     }
+  }
 
-    setPlayerOnLadder = (isOnLadder) => {
-        this.isPlayerOnLadder = isOnLadder
-    }
+  /**
+   * Prevent the player from grap the borders of the screen
+   * @returns {Boolean}
+   */
+  checkOutOfBounds = () => {
+    if (this.sprite.colliding(border) > 0) {
+      console.log("colliding");
 
-    /**
-     * Check if the player is moving
-     * @returns {boolean} is the player moving
-     */
-    isMoving = () => {
-        return pressedKeys['A'] || pressedKeys['D'] || pressedKeys[' ']
+      if (this.sprite.mirror.x == true) {
+        this.sprite.vel.x -= 0.5;
+      } else {
+        this.sprite.vel.x += 0.5;
+      }
     }
+  };
+
+  checkDeath = () => {
+    //TODO: properly detect collisions
+    if (this.sprite.colliding(barrels) > 0) {
+      this.loseLife();
+    }
+  };
+
+  setPlayerOnLadder = (isOnLadder) => {
+    this.isPlayerOnLadder = isOnLadder;
+  };
+
+  /**
+   * Check if the player is moving
+   * @returns {boolean} is the player moving
+   */
+  isMoving = () => {
+    return pressedKeys["A"] || pressedKeys["D"] || pressedKeys[" "];
+  };
+  checkJump = () => {
+    for (let i = 0; i < listBarrels.length; i++) {
+      let barrel = listBarrels[i];
+        //check if the player is above the barrel and close to it
+      if (
+        this.sprite.position.y < barrel.position.y &&
+        abs(this.sprite.position.x - barrel.position.x) < 40 &&
+        abs(this.sprite.position.y - barrel.position.y) < 20
+      ) {
+        console.log(this.sprite.position.y);
+        console.log(barrel.position.y);
+        score += 50;
+        console.log(score);
+        break;
+      }
+    }
+  };
 }
-

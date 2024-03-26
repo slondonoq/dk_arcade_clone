@@ -122,7 +122,7 @@ function draw() {
   scoreBoard.update();
   livesBoard.update();
   listBarrels.update();
-
+  
   
   //Of every 120 frames, paint the image 60 (half on-off)
   if(frameCount%120 < 60 && player.lives > 0 && !player.win){ 
